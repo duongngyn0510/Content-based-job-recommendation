@@ -10,7 +10,7 @@ wn = WordNetLemmatizer()
 
 
 def black_txt(token):
-    return token not in stop_words_ and token not in list(string.punctuation)  and len(token) > 2 
+    return token not in stop_words_ and token not in list(string.punctuation) and len(token) > 2 
 
 def clean_txt(text):
     clean_text = []
