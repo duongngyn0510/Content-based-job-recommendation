@@ -1,14 +1,18 @@
 import pandas as pd
 import scipy
+import torch
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_extraction.text import CountVectorizer
+from transformers import AutoTokenizer, AutoModel
 from sklearn.neighbors import NearestNeighbors
+from bert_extract_feature import extract_feature
 import joblib
 import os
 
 
+
 def feature_extraction_job(final_df_jobs, type):
-    assert type in range(3)
+    assert type in range(4)
 
     if not os.path.exists('pkl_file'):
         os.mkdir('pkl_file')
@@ -91,9 +95,19 @@ def feature_extraction_job(final_df_jobs, type):
 
             return KNN, tfidf_jobid, tfidf_vectorizer
 
- 
+    elif type == 3:
+        """
+        pretrained BERT vectorize and using cosine for compute similarity
+        """
+        if not os.path.exists('./bert_pretrained_vector/pos_feature_vector.pt'):
+            position_feature_vector = extract_feature()
+        else:
+            position_feature_vector = torch.load('./bert_pretrained_vector/pos_feature_vector.pt')
+        return position_feature_vector
+
+
 def feature_extraction_user(user_text, final_df_jobs, type):
-    assert type in range(3)
+    assert type in range(4)
     
     if type == 0:
         _, tfidf_vectorizer = feature_extraction_job(final_df_jobs, type)
@@ -110,3 +124,15 @@ def feature_extraction_user(user_text, final_df_jobs, type):
         user_vector_tfidf = tfidf_vectorizer.transform(user_text)
         NNS = KNN.kneighbors(user_vector_tfidf, return_distance=True)
         return NNS[1][0], NNS[0][0]
+    
+    elif type == 3:
+        position_feature_vector = feature_extraction_job(final_df_jobs, type)
+        tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased', do_basic_tokenization=True)
+        model = AutoModel.from_pretrained('bert-base-uncased', output_hidden_states=True)
+
+        tokens = tokenizer([user_text], max_length=40, padding='max_length', truncation=True)
+        user_feature_vector = model(torch.tensor(tokens['input_ids']), attention_mask=torch.tensor(tokens['attention_mask'])).hidden_states[-1]
+        user_feature_vector = user_feature_vector.mean(axis=1)
+        return position_feature_vector, user_feature_vector
+
+
