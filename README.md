@@ -12,6 +12,8 @@
 + Cài đặt thư viện: bật terminal chạy command: `pip install -r requirements.txt`.
 + Chạy file `recommend.ipynb` để thực hiện đề xuất cho các user.
 
+**Lưu ý**: Để có thể chạy để xuất thành công cho các Applicant.ID nhiều lần thì máy phải có tối thiếu RAM 8GB
+
 ### Giải thích chi tiết các file
 + `bert_pretrained_vector`: chứa feature vector pretrained **BERT** của JOB POSITION, trong đó `pos_feature_vector.pt` sử dụng pretrained BERT để feature extraction.
 + `data`: chứa data ban đầu, trong đó `Combined_Jobs_Final.csv` có mục đích để tạo job corpus, `Experience.csv`, `Job_Views.csv` và `Positions_Of_Interest.csv` để tạo user corpus
